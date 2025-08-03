@@ -1,0 +1,79 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Styling System
+
+## Tailwind CSS v4 Configuration
+
+This project uses **Tailwind CSS v4** with the following setup:
+
+- **Global Styles**: [src/app/globals.css](mdc:src/app/globals.css) - Contains Tailwind imports and CSS variables
+- **Config**: [components.json](mdc:components.json) - shadcn/ui configuration with design tokens
+- **PostCSS**: [postcss.config.mjs](mdc:postcss.config.mjs) - PostCSS configuration
+
+## Design System
+
+### Colors
+- **Base Color**: Neutral (as configured in [components.json](mdc:components.json))
+- **CSS Variables**: Enabled for theming support
+- **Dark Mode**: Supported through CSS variables
+
+### Typography
+- **Font Sans**: Geist (configured in [src/app/layout.tsx](mdc:src/app/layout.tsx))
+- **Font Mono**: Geist Mono
+- **Font Variables**: `--font-geist-sans`, `--font-geist-mono`
+
+### Component Styling
+
+#### Class Utility Function
+Always use the `cn()` utility from [src/lib/utils.ts](mdc:src/lib/utils.ts):
+
+```typescript
+import { cn } from "@/lib/utils"
+
+// Good ✅
+<div className={cn("base-class", conditionalClass && "extra-class")} />
+
+// Avoid ❌  
+<div className={`base-class ${conditionalClass ? "extra-class" : ""}`} />
+```
+
+#### Styling Patterns
+```typescript
+// Conditional styling
+const buttonClasses = cn(
+  "base-button-styles",
+  variant === "primary" && "bg-blue-500",
+  disabled && "opacity-50"
+)
+
+// Component variants using CVA
+const buttonVariants = cva("base-styles", {
+  variants: {
+    variant: {
+      default: "bg-primary text-primary-foreground",
+      destructive: "bg-destructive text-destructive-foreground",
+    }
+  }
+})
+```
+
+## Icons
+
+**Lucide React** is the icon library of choice:
+```typescript
+import { ChevronDown, User, Settings } from "lucide-react"
+```
+
+## Responsive Design
+
+Use Tailwind's responsive prefixes:
+```typescript
+className="text-center sm:text-left md:text-xl lg:text-2xl"
+```
+
+## Animation
+
+The project includes `tw-animate-css` for animations. Use Tailwind's built-in animation utilities or this library for complex animations.

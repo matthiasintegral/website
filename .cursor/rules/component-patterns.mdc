@@ -1,0 +1,68 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Component Organization & Patterns
+
+## Component Architecture
+
+This project uses **shadcn/ui** for UI components with **Radix UI primitives** and **Tailwind CSS** for styling.
+
+## UI Components (`/src/components/ui/`)
+
+These are pre-built, reusable UI components from shadcn/ui:
+
+- **[Button](mdc:src/components/ui/button.tsx)** - Button component with variants (default, destructive, outline, secondary, ghost, link)
+- **[Dropdown Menu](mdc:src/components/ui/dropdown-menu.tsx)** - Accessible dropdown menu built on Radix UI
+
+### Adding New UI Components
+Use the shadcn/ui CLI to add new components:
+```bash
+npx shadcn@latest add [component-name]
+```
+
+## Component Conventions
+
+### File Naming
+- Use **PascalCase** for component files: `MyComponent.tsx`
+- UI components use **kebab-case**: `dropdown-menu.tsx`, `button.tsx`
+
+### Import Patterns
+```typescript
+// UI components
+import { Button } from "@/components/ui/button"
+import { DropdownMenu } from "@/components/ui/dropdown-menu"
+
+// Utilities
+import { cn } from "@/lib/utils"
+
+// Next.js imports
+import Image from "next/image"
+import Link from "next/link"
+```
+
+### Component Structure
+```typescript
+interface ComponentProps {
+  // Define props with TypeScript
+}
+
+export default function Component({ prop1, prop2 }: ComponentProps) {
+  return (
+    <div className={cn("base-classes", conditionalClasses)}>
+      {/* Component JSX */}
+    </div>
+  )
+}
+```
+
+## Styling Patterns
+
+### Tailwind CSS Classes
+- Use the `cn()` utility from [src/lib/utils.ts](mdc:src/lib/utils.ts) for conditional class merging
+- Prefer Tailwind utilities over custom CSS
+- Use CSS variables for theming (configured in [src/app/globals.css](mdc:src/app/globals.css))
+
+### Class Variance Authority (CVA)
+UI components use `class-variance-authority` for variant-based styling patterns.

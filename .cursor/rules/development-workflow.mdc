@@ -1,0 +1,89 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Development Workflow
+
+## Available Scripts
+
+From [package.json](mdc:package.json), these scripts are available:
+
+### Development
+```bash
+# Start development server with Turbopack
+pnpm dev
+
+# Type checking
+pnpm type-check
+```
+
+### Building & Production
+```bash
+# Build for production
+pnpm build
+
+# Start production server
+pnpm start
+```
+
+### Code Quality
+```bash
+# Run ESLint
+pnpm lint
+
+# Fix ESLint issues automatically
+pnpm lint:fix
+
+# Format code with Prettier
+pnpm format
+
+# Check formatting without fixing
+pnpm format:check
+```
+
+## Development Stack
+
+### Core Technologies
+- **Next.js 15.4.5** with App Router
+- **React 19.1.0** 
+- **TypeScript 5.8.3**
+- **Tailwind CSS v4**
+
+### UI & Components
+- **shadcn/ui** components
+- **Radix UI** primitives
+- **Lucide React** icons
+- **Class Variance Authority** for component variants
+
+### Development Tools
+- **ESLint** with Next.js and Prettier configs
+- **Prettier** for code formatting
+- **Turbopack** for fast development builds
+- **pnpm** for package management
+
+## Path Aliases
+
+Configured in [tsconfig.json](mdc:tsconfig.json):
+- `@/*` maps to `./src/*`
+
+Usage examples:
+```typescript
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+```
+
+## File Organization Best Practices
+
+1. **App Router**: Place pages and layouts in `/src/app/`
+2. **Components**: Reusable components in `/src/components/`
+3. **Features**: Feature-specific code in `/src/features/`
+4. **Utilities**: Shared functions in `/src/lib/`
+
+## Adding New Dependencies
+
+Use pnpm for consistency:
+```bash
+pnpm add [package-name]
+pnpm add -D [dev-package-name]
+```

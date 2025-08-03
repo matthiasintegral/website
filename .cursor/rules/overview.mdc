@@ -1,0 +1,77 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Integral Project - Cursor Rules Overview
+
+Welcome to the **Integral** Next.js application! This overview provides quick navigation to all project documentation and conventions.
+
+## 📁 Quick Navigation Rules
+
+1. **[Project Structure Guide](mdc:.cursor/rules/project-structure.mdc)** - Complete overview of the codebase architecture
+2. **[Component Patterns](mdc:.cursor/rules/component-patterns.mdc)** - Component organization and shadcn/ui usage
+3. **[Development Workflow](mdc:.cursor/rules/development-workflow.mdc)** - Scripts, tools, and development practices
+4. **[Styling System](mdc:.cursor/rules/styling-system.mdc)** - Tailwind CSS v4 and design system guidelines
+5. **[Naming Conventions](mdc:.cursor/rules/naming-conventions.mdc)** - File and code naming standards
+
+## 🚀 Quick Start
+
+```bash
+# Install dependencies
+pnpm install
+
+# Start development server
+pnpm dev
+
+# Open http://localhost:3000
+```
+
+## 🎯 Key Files to Know
+
+- **Main Entry**: [src/app/page.tsx](mdc:src/app/page.tsx)
+- **Root Layout**: [src/app/layout.tsx](mdc:src/app/layout.tsx)
+- **Global Styles**: [src/app/globals.css](mdc:src/app/globals.css)
+- **Utilities**: [src/lib/utils.ts](mdc:src/lib/utils.ts)
+- **Package Config**: [package.json](mdc:package.json)
+
+## 🛠 Tech Stack Summary
+
+- **Framework**: Next.js 15.4.5 (App Router)
+- **Language**: TypeScript 5.8.3
+- **Styling**: Tailwind CSS v4
+- **UI Components**: shadcn/ui + Radix UI
+- **Icons**: Lucide React
+- **Package Manager**: pnpm
+- **Code Quality**: ESLint + Prettier
+
+## 📦 Common Commands
+
+```bash
+# Development
+pnpm dev                # Start dev server with Turbopack
+pnpm type-check        # TypeScript checking
+
+# Code Quality
+pnpm lint              # Run ESLint
+pnpm lint:fix          # Fix ESLint issues
+pnpm format            # Format with Prettier
+
+# Production
+pnpm build             # Build for production
+pnpm start             # Start production server
+
+# Adding UI Components
+pnpm dlx shadcn@latest add button
+pnpm dlx shadcn@latest add dropdown-menu
+```
+
+## 📝 Path Aliases
+
+Use `@/` for clean imports:
+```typescript
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+```
+
+This project follows modern Next.js best practices with a clean, scalable architecture. Refer to the individual rule files for detailed guidelines on each aspect of development.

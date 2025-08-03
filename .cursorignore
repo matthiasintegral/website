@@ -1,0 +1,57 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.*
+.yarn/
+
+# Build outputs
+.next/
+out/
+build/
+dist/
+
+# Cache and temporary files
+.cache/
+.parcel-cache/
+.eslintcache
+.swc/
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Coverage reports
+coverage/
+.nyc_output/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Lock files (usually not needed in cursor indexing)
+package-lock.json
+pnpm-lock.yaml
+yarn.lock 

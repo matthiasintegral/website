@@ -1,0 +1,42 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Project Structure Guide
+
+This is a **Next.js 15.4.5** application using the **App Router** with TypeScript and Tailwind CSS v4.
+
+## Core Architecture
+
+- **Entry Point**: [src/app/layout.tsx](mdc:src/app/layout.tsx) - Root layout with font configuration
+- **Main Page**: [src/app/page.tsx](mdc:src/app/page.tsx) - Home page component
+- **Global Styles**: [src/app/globals.css](mdc:src/app/globals.css) - Tailwind CSS imports and custom styles
+
+## Directory Structure
+
+### `/src/app/` - Next.js App Router
+- Contains pages, layouts, and route handlers
+- Uses file-based routing system
+- Each folder can contain `page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`, etc.
+
+### `/src/components/` - Reusable Components
+- **`/ui/`** - UI components from shadcn/ui library (e.g., [button.tsx](mdc:src/components/ui/button.tsx), [dropdown-menu.tsx](mdc:src/components/ui/dropdown-menu.tsx))
+- Custom application components should go in the root of this directory
+
+### `/src/features/` - Feature-Based Organization
+- Currently empty but intended for feature-specific components and logic
+- Each feature should be self-contained with its own components, hooks, and utilities
+
+### `/src/lib/` - Shared Utilities
+- **[utils.ts](mdc:src/lib/utils.ts)** - Contains the `cn()` utility for merging Tailwind classes
+- Shared functions, constants, and configurations
+
+## Key Configuration Files
+
+- **[package.json](mdc:package.json)** - Dependencies and npm scripts
+- **[tsconfig.json](mdc:tsconfig.json)** - TypeScript configuration with `@/*` path mapping
+- **[components.json](mdc:components.json)** - shadcn/ui configuration
+- **[next.config.ts](mdc:next.config.ts)** - Next.js configuration
+- **[eslint.config.mjs](mdc:eslint.config.mjs)** - ESLint configuration
+- **[.prettierrc.mjs](mdc:.prettierrc.mjs)** - Prettier formatting rules

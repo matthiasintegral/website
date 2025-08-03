@@ -1,0 +1,123 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Naming Conventions
+
+## File Naming
+
+### Components
+- **React Components**: Use **PascalCase** for custom components
+  ```
+  UserProfile.tsx
+  NavigationBar.tsx
+  ```
+
+- **UI Components**: Use **kebab-case** for shadcn/ui components
+  ```
+  src/components/ui/button.tsx
+  src/components/ui/dropdown-menu.tsx
+  ```
+
+### Pages & Routes (App Router)
+- **Pages**: Use **lowercase** for route segments
+  ```
+  src/app/dashboard/page.tsx
+  src/app/user/[id]/page.tsx
+  ```
+
+- **Special Files**: Follow Next.js conventions
+  ```
+  layout.tsx, page.tsx, loading.tsx, error.tsx, not-found.tsx
+  ```
+
+### Utilities & Libraries
+- **Utility Files**: Use **kebab-case**
+  ```
+  src/lib/utils.ts
+  src/lib/api-client.ts
+  ```
+
+## Code Naming
+
+### Variables & Functions
+- Use **camelCase** for variables and functions
+  ```typescript
+  const userName = "john"
+  const fetchUserData = async () => {}
+  ```
+
+### Constants
+- Use **SCREAMING_SNAKE_CASE** for constants
+  ```typescript
+  const API_BASE_URL = "https://api.example.com"
+  const MAX_RETRY_ATTEMPTS = 3
+  ```
+
+### Interfaces & Types
+- Use **PascalCase** with descriptive names
+  ```typescript
+  interface UserProfile {
+    id: string
+    email: string
+  }
+  
+  type ButtonVariant = "default" | "destructive" | "outline"
+  ```
+
+### Component Props
+- Use **PascalCase** for prop interfaces, often suffixed with "Props"
+  ```typescript
+  interface ButtonProps {
+    variant?: ButtonVariant
+    children: React.ReactNode
+  }
+  ```
+
+## Import/Export Patterns
+
+### Default Exports
+- Use for React components and main module exports
+  ```typescript
+  export default function Button({ children }: ButtonProps) {
+    return <button>{children}</button>
+  }
+  ```
+
+### Named Exports
+- Use for utilities, types, and multiple exports
+  ```typescript
+  export const cn = (/* ... */) => { /* ... */ }
+  export type { ButtonProps }
+  ```
+
+### Import Organization
+```typescript
+// 1. Node modules
+import React from "react"
+import Image from "next/image"
+
+// 2. Internal utilities (using @/ alias)
+import { cn } from "@/lib/utils"
+
+// 3. Internal components
+import { Button } from "@/components/ui/button"
+
+// 4. Local/relative imports
+import "./styles.css"
+```
+
+## Directory Structure Naming
+
+- **Features**: Use **kebab-case** for feature directories
+  ```
+  src/features/user-management/
+  src/features/auth-flow/
+  ```
+
+- **Components**: Group by purpose, use **kebab-case** for folders
+  ```
+  src/components/forms/
+  src/components/layout/
+  ```

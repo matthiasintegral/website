@@ -1,0 +1,164 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: oklch(0.99 0.005 280);
+  --color-foreground: oklch(0.15 0.02 260);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* Modern purple-violet theme */
+  --color-exercise-primary: oklch(0.55 0.25 280);
+  --color-exercise-secondary: oklch(0.7 0.15 290);
+  --color-exercise-accent: oklch(0.65 0.2 320);
+  --color-exercise-success: oklch(0.6 0.18 150);
+  --color-exercise-warning: oklch(0.7 0.15 60);
+  --color-exercise-error: oklch(0.65 0.2 15);
+  --color-exercise-neutral: oklch(0.92 0.01 260);
+
+  /* shadcn/ui color variables with modern palette */
+  --color-card: oklch(0.99 0.005 280);
+  --color-card-foreground: oklch(0.15 0.02 260);
+  --color-popover: oklch(0.99 0.005 280);
+  --color-popover-foreground: oklch(0.15 0.02 260);
+  --color-primary: oklch(0.55 0.25 280);
+  --color-primary-foreground: oklch(0.98 0.01 280);
+  --color-secondary: oklch(0.96 0.02 260);
+  --color-secondary-foreground: oklch(0.15 0.02 260);
+  --color-muted: oklch(0.96 0.02 260);
+  --color-muted-foreground: oklch(0.5 0.02 260);
+  --color-accent: oklch(0.96 0.02 260);
+  --color-accent-foreground: oklch(0.15 0.02 260);
+  --color-destructive: oklch(0.65 0.2 15);
+  --color-destructive-foreground: oklch(0.98 0.01 280);
+  --color-border: oklch(0.9 0.01 260);
+  --color-input: oklch(0.9 0.01 260);
+  --color-ring: oklch(0.55 0.25 280);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius: 0.5rem;
+}
+
+.dark {
+  --color-background: oklch(0.08 0.01 260);
+  --color-foreground: oklch(0.95 0.01 280);
+  --color-card: oklch(0.12 0.02 260);
+  --color-card-foreground: oklch(0.95 0.01 280);
+  --color-popover: oklch(0.12 0.02 260);
+  --color-popover-foreground: oklch(0.95 0.01 280);
+  --color-primary: oklch(0.65 0.25 280);
+  --color-primary-foreground: oklch(0.08 0.01 260);
+  --color-secondary: oklch(0.18 0.02 260);
+  --color-secondary-foreground: oklch(0.95 0.01 280);
+  --color-muted: oklch(0.18 0.02 260);
+  --color-muted-foreground: oklch(0.65 0.02 260);
+  --color-accent: oklch(0.18 0.02 260);
+  --color-accent-foreground: oklch(0.95 0.01 280);
+  --color-destructive: oklch(0.75 0.2 15);
+  --color-destructive-foreground: oklch(0.08 0.01 260);
+  --color-border: oklch(0.25 0.02 260);
+  --color-input: oklch(0.25 0.02 260);
+  --color-ring: oklch(0.65 0.25 280);
+}
+
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+@layer utilities {
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+
+  .exercise-gradient {
+    background: linear-gradient(
+      135deg,
+      oklch(0.55 0.25 280) 0%,
+      oklch(0.65 0.2 320) 100%
+    );
+  }
+
+  .exercise-gradient-subtle {
+    background: linear-gradient(
+      135deg,
+      oklch(0.7 0.15 290) 0%,
+      oklch(0.65 0.2 320) 100%
+    );
+  }
+
+  .exercise-card-hover {
+    @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-2 hover:shadow-purple-500/10;
+  }
+
+  .exercise-status-open {
+    @apply bg-emerald-50 text-emerald-700 border-emerald-200;
+  }
+
+  .exercise-status-pending {
+    @apply bg-amber-50 text-amber-700 border-amber-200;
+  }
+
+  .exercise-status-finished {
+    @apply bg-slate-50 text-slate-600 border-slate-200;
+  }
+
+  .exercise-level-beginner {
+    @apply bg-cyan-50 text-cyan-700 border-cyan-200;
+  }
+
+  .exercise-level-intermediate {
+    @apply bg-purple-50 text-purple-700 border-purple-200;
+  }
+
+  .exercise-level-advanced {
+    @apply bg-rose-50 text-rose-700 border-rose-200;
+  }
+
+  .glassmorphism {
+    @apply bg-white/80 backdrop-blur-lg border border-white/20;
+  }
+
+  .glassmorphism-dark {
+    @apply bg-slate-900/80 backdrop-blur-lg border border-slate-700/20;
+  }
+
+  .text-gradient {
+    @apply text-transparent bg-clip-text;
+    background-image: linear-gradient(
+      135deg,
+      oklch(0.55 0.25 280) 0%,
+      oklch(0.65 0.2 320) 100%
+    );
+  }
+
+  .shadow-glow {
+    box-shadow: 0 0 30px oklch(0.55 0.25 280 / 0.15);
+  }
+
+  .shadow-glow-hover:hover {
+    box-shadow: 0 0 40px oklch(0.55 0.25 280 / 0.25);
+  }
+}
