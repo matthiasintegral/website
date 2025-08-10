@@ -170,14 +170,14 @@ class MathExerciseAnalyzer:
         
         structure_prompt = """Extract the following information from the analysis and return it as JSON:
 
-        {
+        {{
             "statement": "extracted problem statement",
             "response": "extracted solution/answer", 
             "domain": "mathematical domain",
             "level": "difficulty level",
             "confidence_score": score between 0 and 1,
             "is_continuation": boolean indicating if this is a continuation from previous page
-        }
+        }}
 
         Analysis text:
         {analysis}"""
@@ -242,13 +242,13 @@ class MathExerciseAnalyzer:
                 - Ensure the final statement and response are coherent and complete
 
                 Return the combined analysis as JSON:
-                {
+                {{
                     "statement": "combined problem statement",
                     "response": "combined complete solution/answer",
                     "domain": "mathematical domain",
                     "level": "difficulty level", 
                     "confidence_score": overall score between 0 and 1
-                }
+                }}
 
                 Individual analyses:
                 {analyses}"""
