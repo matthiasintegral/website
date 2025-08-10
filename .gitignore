@@ -41,17 +41,18 @@ yarn-error.log*
 next-env.d.ts
 
 #images
-/images/
+**/images/
 .jpg
 .png
 .jpeg
 
 #virtual env
-/.venv
-/venv
+**/.venv
+**/venv
 
 #uv lock
-.lock
+**/*.lock
 
 #pycache
-/__pycache__
+**/__pycache__/
+**/*.pyc
