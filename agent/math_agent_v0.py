@@ -17,6 +17,7 @@ load_dotenv()
 @dataclass
 class MathExercise:
     """Data class to represent a mathematical exercise"""
+    title: str  # New field for exercise title
     statement: str
     response: str
     domain: str
@@ -117,24 +118,25 @@ class MathExerciseAnalyzer:
         current_index = state["current_image_index"]
         base64_image = state["base64_images"][current_index]
         
-        system_prompt = """You are an expert mathematical exercise analyzer. Analyze the handwritten mathematical exercise and extract:
+        system_prompt = """You are an expert mathematical exercise analyzer with OCR capabilities. Your task is to transcribe EXACTLY what you see in the handwritten mathematical exercise, converting mathematical notation to LaTeX format.
 
-            1. **Statement**: The mathematical problem or question being asked
-            2. **Response**: The handwritten solution or answer provided  
-            3. **Domain**: The mathematical domain (Algebra, Calculus, Geometry, Trigonometry, Statistics, etc.)
-            4. **Level**: The difficulty level (Elementary, Middle School, High School, College, Advanced)
+            Extract the following information:
 
-            Guidelines:
-            - Be precise in extracting mathematical expressions and symbols
-            - Identify mathematical notation correctly (fractions, exponents, integrals, etc.)
-            - Determine the appropriate mathematical domain based on the content
-            - Assess difficulty level based on mathematical concepts used
-            - Provide confidence scores for your analysis
-            - Handle both text and mathematical notation in the handwritten content
-            - If this appears to be a continuation from a previous page, note that in your analysis
-            - If this is a new problem, treat it as such
+            1. **Title**: A descriptive title for the exercise (e.g., "Solving Quadratic Equations", "Integration by Parts", "Geometry Problem with Circles")
+            2. **Statement**: The mathematical problem or question being asked (transcribe exactly as written)
+            3. **Response**: The handwritten solution or answer provided (transcribe exactly as written)
+            4. **Domain**: The mathematical domain (Algebra, Calculus, Geometry, Trigonometry, Statistics, etc.)
+            5. **Level**: The difficulty level (Elementary, Middle School, High School, College, Advanced)
 
-            Return your analysis in a clear, structured format."""
+            CRITICAL GUIDELINES:
+            - **OCR-like Transcription**: Transcribe ONLY what is visible in the image, exactly as written
+            - **LaTeX Integration**: Convert ALL mathematical notation to proper LaTeX format
+            - **Preserve Original Content**: Do not add, remove, or modify mathematical content
+            - **Maintain Structure**: Keep the original layout and flow of the exercise
+            - **Confidence Assessment**: Provide confidence scores based on clarity of handwriting
+            - **Page Continuity**: Note if this appears to be a continuation from a previous page
+
+            Return your analysis in a clear, structured format with proper LaTeX notation."""
 
         try:
             message = HumanMessage(
@@ -168,17 +170,19 @@ class MathExerciseAnalyzer:
         current_index = state["current_image_index"]
         raw_analysis = state["raw_analyses"][current_index]
         
-        structure_prompt = """Extract the following information from the analysis and return it as JSON:
+        structure_prompt = """Extract the following information from the analysis and return it as JSON with proper LaTeX notation:
 
         {{
-            "statement": "extracted problem statement",
-            "response": "extracted solution/answer", 
+            "title": "descriptive title for the exercise",
+            "statement": "extracted problem statement with LaTeX notation",
+            "response": "extracted solution/answer with LaTeX notation", 
             "domain": "mathematical domain",
             "level": "difficulty level",
             "confidence_score": score between 0 and 1,
             "is_continuation": boolean indicating if this is a continuation from previous page
         }}
 
+        IMPORTANT: Ensure all mathematical expressions use proper LaTeX syntax.
         Analysis text:
         {analysis}"""
 
@@ -232,24 +236,28 @@ class MathExerciseAnalyzer:
             else:
                 # Multiple images, need to combine intelligently
                 combine_prompt = """You are an expert at combining mathematical exercise analyses from multiple pages. 
-                Given analyses from multiple pages of the same exercise, create a unified analysis.
+                Given analyses from multiple pages of the same exercise, create a unified analysis with proper LaTeX notation.
 
                 Guidelines:
-                - If the first page contains the problem statement, use that
+                - If the first page contains the problem statement, use that for the title and statement
                 - If subsequent pages contain solutions, combine them into a complete response
                 - Maintain the mathematical domain and level from the most confident analysis
                 - Calculate an overall confidence score based on all analyses
                 - Ensure the final statement and response are coherent and complete
+                - Preserve all LaTeX notation from individual analyses
+                - Create a descriptive title that captures the essence of the exercise
 
                 Return the combined analysis as JSON:
                 {{
-                    "statement": "combined problem statement",
-                    "response": "combined complete solution/answer",
+                    "title": "descriptive title for the complete exercise",
+                    "statement": "combined problem statement with LaTeX notation",
+                    "response": "combined complete solution/answer with LaTeX notation",
                     "domain": "mathematical domain",
                     "level": "difficulty level", 
                     "confidence_score": overall score between 0 and 1
                 }}
 
+                IMPORTANT: Maintain all LaTeX syntax and mathematical notation from the original analyses.
                 Individual analyses:
                 {analyses}"""
 
@@ -274,13 +282,20 @@ class MathExerciseAnalyzer:
             analysis = state["combined_analysis"]
             
             # Validate required fields
-            required_fields = ["statement", "response", "domain", "level", "confidence_score"]
+            required_fields = ["title", "statement", "response", "domain", "level", "confidence_score"]
             for field in required_fields:
                 if field not in analysis:
-                    analysis[field] = "Unknown" if field != "confidence_score" else 0.0
+                    if field == "title":
+                        # Generate a title from the statement if missing
+                        analysis[field] = f"{analysis.get('domain', 'Math')} Exercise"
+                    elif field == "confidence_score":
+                        analysis[field] = 0.0
+                    else:
+                        analysis[field] = "Unknown"
             
             # Create MathExercise object with multiple image paths
             exercise = MathExercise(
+                title=analysis["title"],
                 statement=analysis["statement"],
                 response=analysis["response"],
                 domain=analysis["domain"],
