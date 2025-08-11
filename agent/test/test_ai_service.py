@@ -2,8 +2,8 @@ import pytest
 from unittest.mock import patch, MagicMock
 
 # Mock the math_agent_v0 import since it might not be available in test environment
-with patch.dict('sys.modules', {'math_agent_v0': MagicMock()}):
-    from services.ai_service import AIService
+with patch.dict('sys.modules', {'agent.math_agent_v0': MagicMock()}):
+    from agent.backend.services.ai_service import AIService
 
 class TestAIService:
     """Test cases for AIService"""

@@ -1,18 +1,11 @@
 import pytest
 import tempfile
 import shutil
-from pathlib import Path
 from fastapi.testclient import TestClient
-from fastapi import FastAPI
-import sys
-import os
 
-# Add the backend directory to the path
-sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
-
-from main import app
-from services.storage_service import FileStorageService
-from models import ExerciseCreate, Category
+from agent.backend.main import app
+from agent.backend.services.storage_service import FileStorageService
+from agent.backend.models import ExerciseCreate, Category
 
 @pytest.fixture
 def test_app():

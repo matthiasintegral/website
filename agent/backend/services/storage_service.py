@@ -1,10 +1,11 @@
 import json
 import os
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 from datetime import datetime
 import uuid
-from models import Exercise, ExerciseCreate, ExerciseUpdate
+
+from agent.backend.models import Exercise, ExerciseCreate, ExerciseUpdate
 
 class FileStorageService:
     """File-based storage service for exercises"""
@@ -75,7 +76,7 @@ class FileStorageService:
         # Save to file
         file_path = self._get_exercise_file_path(exercise_id)
         with open(file_path, 'w', encoding='utf-8') as f:
-            json.dump(exercise.dict(), f, default=str, indent=2, ensure_ascii=False)
+            json.dump(exercise.model_dump(), f, default=str, indent=2, ensure_ascii=False)
         
         return exercise
     
@@ -129,7 +130,7 @@ class FileStorageService:
             return None
         
         # Update fields
-        update_dict = update_data.dict(exclude_unset=True)
+        update_dict = update_data.model_dump(exclude_unset=True)
         for field, value in update_dict.items():
             if field == "title" and value:
                 # Handle title deduplication for updates
@@ -139,7 +140,7 @@ class FileStorageService:
         # Save updated exercise
         file_path = self._get_exercise_file_path(exercise_id)
         with open(file_path, 'w', encoding='utf-8') as f:
-            json.dump(exercise.dict(), f, default=str, indent=2, ensure_ascii=False)
+            json.dump(exercise.model_dump(), f, default=str, indent=2, ensure_ascii=False)
         
         return exercise
     

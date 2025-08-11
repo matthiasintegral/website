@@ -3,12 +3,12 @@ from fastapi.responses import JSONResponse
 from typing import List, Optional
 import logging
 
-from models import (
+from agent.backend.models import (
     Exercise, ExerciseCreate, ExerciseUpdate, ExerciseList, 
     AIConversionResponse, Category
 )
-from services.storage_service import FileStorageService
-from services.ai_service import AIService
+from agent.backend.services.storage_service import FileStorageService
+from agent.backend.services.ai_service import AIService
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

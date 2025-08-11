@@ -1,13 +1,10 @@
-import sys
 import os
 from pathlib import Path
 from typing import List, Tuple
 import tempfile
 from PIL import Image
 
-# Add the parent directory to sys.path to import the math agent
-sys.path.append(str(Path(__file__).parent.parent.parent))
-from math_agent_v0 import MathExerciseAnalyzer
+from agent.math_agent_v0 import MathExerciseAnalyzer
 
 class AIService:
     """Service for AI-powered image processing and exercise extraction"""

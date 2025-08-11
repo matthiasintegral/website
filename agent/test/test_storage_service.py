@@ -1,6 +1,6 @@
 from pathlib import Path
-from services.storage_service import FileStorageService
-from models import ExerciseCreate, ExerciseUpdate, Category
+from agent.backend.services.storage_service import FileStorageService
+from agent.backend.models import ExerciseCreate, ExerciseUpdate, Category
 
 class TestFileStorageService:
     """Test cases for FileStorageService"""

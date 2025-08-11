@@ -1,10 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-import os
 from pathlib import Path
 
-import routers
+from agent.backend.routers import router
 
 # Create data directories if they don't exist
 data_dir = Path("data")
@@ -28,7 +27,7 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(routers.router, prefix="/api", tags=["exercises"])
+app.include_router(router, prefix="/api", tags=["exercises"])
 
 # Mount static files for images
 app.mount("/images", StaticFiles(directory="data/images"), name="images")
