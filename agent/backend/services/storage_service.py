@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 import uuid
-from models.exercise import Exercise, ExerciseCreate, ExerciseUpdate
+from models import Exercise, ExerciseCreate, ExerciseUpdate
 
 class FileStorageService:
     """File-based storage service for exercises"""

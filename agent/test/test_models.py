@@ -1,8 +1,8 @@
 import pytest
 from datetime import datetime
-from models.exercise import (
+from models import (
     ExerciseBase, ExerciseCreate, ExerciseUpdate, Exercise, 
-    ExerciseList, AIConversionRequest, AIConversionResponse, Category
+    ExerciseList, AIConversionResponse, Category
 )
 
 class TestExerciseModels:

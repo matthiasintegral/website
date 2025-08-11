@@ -6,8 +6,6 @@ This script creates a test exercise and demonstrates the API endpoints
 
 import requests
 import json
-import time
-from pathlib import Path
 
 # API base URL
 BASE_URL = "http://localhost:8000"

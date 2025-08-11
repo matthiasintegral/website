@@ -1,11 +1,5 @@
 import pytest
-from unittest.mock import patch, MagicMock, Mock
-import tempfile
-import os
-from pathlib import Path
-import io
-from PIL import Image
-import numpy as np
+from unittest.mock import patch, MagicMock
 
 # Mock the math_agent_v0 import since it might not be available in test environment
 with patch.dict('sys.modules', {'math_agent_v0': MagicMock()}):

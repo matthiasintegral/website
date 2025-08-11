@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from typing import List, Optional
 import logging
 
-from models.exercise import (
+from models import (
     Exercise, ExerciseCreate, ExerciseUpdate, ExerciseList, 
     AIConversionResponse, Category
 )
@@ -21,10 +21,7 @@ storage_service = FileStorageService()
 ai_service = AIService()
 
 @router.get("/exercises", response_model=ExerciseList)
-async def get_exercises(
-    title: Optional[str] = None,
-    category: Optional[str] = None
-):
+async def get_exercises(title: Optional[str] = None, category: Optional[str] = None):
     """
     Get all exercises with optional filtering
     
@@ -44,6 +41,32 @@ async def get_exercises(
     except Exception as e:
         logger.error(f"Error fetching exercises: {e}")
         raise HTTPException(status_code=500, detail="Failed to fetch exercises")
+
+@router.get("/exercises/categories")
+async def get_categories():
+    """Get all available mathematical categories"""
+    return [category.value for category in Category]
+
+@router.get("/exercises/stats")
+async def get_exercise_stats():
+    """Get exercise statistics"""
+    try:
+        total_exercises = storage_service.get_exercise_count()
+        categories = storage_service.get_all_exercises()
+        
+        # Count by category
+        category_counts = {}
+        for exercise in categories:
+            cat = exercise.category.value
+            category_counts[cat] = category_counts.get(cat, 0) + 1
+        
+        return {
+            "total_exercises": total_exercises,
+            "category_distribution": category_counts
+        }
+    except Exception as e:
+        logger.error(f"Error fetching exercise stats: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch exercise statistics")
 
 @router.get("/exercises/{exercise_id}", response_model=Exercise)
 async def get_exercise(exercise_id: str):
@@ -65,7 +88,7 @@ async def get_exercise(exercise_id: str):
         logger.error(f"Error fetching exercise {exercise_id}: {e}")
         raise HTTPException(status_code=500, detail="Failed to fetch exercise")
 
-@router.post("/exercises", response_model=Exercise)
+@router.post("/exercises", response_model=Exercise, status_code=201)
 async def create_exercise(exercise_data: ExerciseCreate):
     """
     Create a new exercise
@@ -87,9 +110,7 @@ async def create_exercise(exercise_data: ExerciseCreate):
         raise HTTPException(status_code=500, detail="Failed to create exercise")
 
 @router.post("/exercises/ai-conversion", response_model=AIConversionResponse)
-async def convert_image_to_exercise(
-    files: List[UploadFile] = File(...)
-):
+async def convert_image_to_exercise(files: List[UploadFile] = File(...)):
     """
     Convert uploaded images to exercise data using AI
     
@@ -135,10 +156,7 @@ async def convert_image_to_exercise(
         raise HTTPException(status_code=500, detail="AI conversion failed")
 
 @router.put("/exercises/{exercise_id}", response_model=Exercise)
-async def update_exercise(
-    exercise_id: str,
-    update_data: ExerciseUpdate
-):
+async def update_exercise(exercise_id: str,update_data: ExerciseUpdate):
     """
     Update an existing exercise
     
@@ -178,30 +196,4 @@ async def delete_exercise(exercise_id: str):
         raise
     except Exception as e:
         logger.error(f"Error deleting exercise {exercise_id}: {e}")
-        raise HTTPException(status_code=500, detail="Failed to delete exercise")
-
-@router.get("/exercises/categories")
-async def get_categories():
-    """Get all available mathematical categories"""
-    return [category.value for category in Category]
-
-@router.get("/exercises/stats")
-async def get_exercise_stats():
-    """Get exercise statistics"""
-    try:
-        total_exercises = storage_service.get_exercise_count()
-        categories = storage_service.get_all_exercises()
-        
-        # Count by category
-        category_counts = {}
-        for exercise in categories:
-            cat = exercise.category.value
-            category_counts[cat] = category_counts.get(cat, 0) + 1
-        
-        return {
-            "total_exercises": total_exercises,
-            "category_distribution": category_counts
-        }
-    except Exception as e:
-        logger.error(f"Error fetching exercise stats: {e}")
-        raise HTTPException(status_code=500, detail="Failed to fetch exercise statistics") 
+        raise HTTPException(status_code=500, detail="Failed to delete exercise") 

@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 import os
 from pathlib import Path
 
-from routers import exercises
+import routers
 
 # Create data directories if they don't exist
 data_dir = Path("data")
@@ -28,7 +28,7 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(exercises.router, prefix="/api", tags=["exercises"])
+app.include_router(routers.router, prefix="/api", tags=["exercises"])
 
 # Mount static files for images
 app.mount("/images", StaticFiles(directory="data/images"), name="images")

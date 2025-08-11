@@ -1,8 +1,6 @@
-import pytest
-import json
 from pathlib import Path
 from services.storage_service import FileStorageService
-from models.exercise import ExerciseCreate, ExerciseUpdate, Category
+from models import ExerciseCreate, ExerciseUpdate, Category
 
 class TestFileStorageService:
     """Test cases for FileStorageService"""

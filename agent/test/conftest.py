@@ -12,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
 
 from main import app
 from services.storage_service import FileStorageService
-from models.exercise import ExerciseCreate, Category
+from models import ExerciseCreate, Category
 
 @pytest.fixture
 def test_app():
