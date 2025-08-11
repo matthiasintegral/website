@@ -1,0 +1,12 @@
+{
+  "title": "Updated Quadratic Equation (4)",
+  "statement": "Solve the updated equation: $x^2 - 6x + 8 = 0$",
+  "solution": "Step 1: Factor the expression\n$x^2 - 5x + 6 = (x - 2)(x - 3)$\n\nStep 2: Set factors to zero\n$x - 2 = 0$ or $x - 3 = 0$\n\nStep 3: Solve\n$x = 2$ or $x = 3$",
+  "category": "Algebra",
+  "id": "exercise_f5a81019",
+  "level": "advanced",
+  "status": "finished",
+  "createdAt": "2025-08-11 12:17:54.747295",
+  "imagePaths": [],
+  "confidenceScore": 1.0
+}

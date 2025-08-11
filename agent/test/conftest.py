@@ -13,9 +13,30 @@ def test_app():
     return app
 
 @pytest.fixture
-def client(test_app):
+def client(test_app, temp_data_dir):
     """Create a test client for the FastAPI application"""
-    return TestClient(test_app)
+    # Override the storage service with a test one
+    from agent.backend import routers
+    from agent.backend.services.ai_service import AIService
+    from unittest.mock import MagicMock
+    
+    original_storage_service = routers.storage_service
+    original_ai_service = routers.ai_service
+    
+    routers.storage_service = FileStorageService(data_dir=temp_data_dir)
+    
+    # Create a mock AI service that passes validation by default
+    mock_ai_service = MagicMock(spec=AIService)
+    mock_ai_service.validate_image.return_value = True
+    routers.ai_service = mock_ai_service
+    
+    client = TestClient(test_app)
+    
+    yield client
+    
+    # Restore original services
+    routers.storage_service = original_storage_service
+    routers.ai_service = original_ai_service
 
 @pytest.fixture
 def temp_data_dir():

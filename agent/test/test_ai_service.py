@@ -10,7 +10,7 @@ class TestAIService:
     
     def test_init_with_available_analyzer(self):
         """Test initialization when MathExerciseAnalyzer is available"""
-        with patch('services.ai_service.MathExerciseAnalyzer') as mock_analyzer_class:
+        with patch('agent.backend.services.ai_service.MathExerciseAnalyzer') as mock_analyzer_class:
             mock_analyzer = MagicMock()
             mock_analyzer_class.return_value = mock_analyzer
             
@@ -21,12 +21,12 @@ class TestAIService:
     
     def test_init_with_unavailable_analyzer(self):
         """Test initialization when MathExerciseAnalyzer is not available"""
-        with patch('services.ai_service.MathExerciseAnalyzer', side_effect=ImportError("Module not found")):
+        with patch('agent.backend.services.ai_service.MathExerciseAnalyzer', side_effect=ImportError("Module not found")):
             service = AIService()
             
             assert service.analyzer is None
     
-    @patch('services.ai_service.MathExerciseAnalyzer')
+    @patch('agent.backend.services.ai_service.MathExerciseAnalyzer')
     def test_process_images_success(self, mock_analyzer_class):
         """Test successful image processing"""
         # Mock the analyzer
@@ -82,7 +82,7 @@ class TestAIService:
         with pytest.raises(Exception, match="AI service not properly initialized"):
             service.process_images([mock_file], ["test.jpg"])
     
-    @patch('services.ai_service.MathExerciseAnalyzer')
+    @patch('agent.backend.services.ai_service.MathExerciseAnalyzer')
     def test_process_single_image(self, mock_analyzer_class):
         """Test processing a single image"""
         # Mock the analyzer
@@ -153,7 +153,7 @@ class TestAIService:
     
     def test_get_health_status_healthy(self):
         """Test health status when analyzer is available"""
-        with patch('services.ai_service.MathExerciseAnalyzer') as mock_analyzer_class:
+        with patch('agent.backend.services.ai_service.MathExerciseAnalyzer') as mock_analyzer_class:
             mock_analyzer = MagicMock()
             mock_analyzer_class.return_value = mock_analyzer
             
@@ -175,7 +175,7 @@ class TestAIService:
         assert health["analyzer_available"] is False
         assert health["service"] == "AI Math Exercise Analyzer"
     
-    @patch('services.ai_service.MathExerciseAnalyzer')
+    @patch('agent.backend.services.ai_service.MathExerciseAnalyzer')
     def test_process_images_cleanup_temp_files(self, mock_analyzer_class):
         """Test that temporary files are cleaned up after processing"""
         # Mock the analyzer

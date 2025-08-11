@@ -14,7 +14,7 @@ class TestFileStorageService:
     
     def test_create_exercise(self, storage_service, sample_exercise_create):
         """Test creating a new exercise"""
-        exercise = storage_service.create_exercise(sample_exercise_create)
+        exercise = storage_service.create_exercise(sample_exercise_create, confidence_score=1.0)
         
         assert exercise.id is not None
         assert exercise.title == sample_exercise_create.title
@@ -175,7 +175,7 @@ class TestFileStorageService:
         class MockFile:
             def __init__(self, content):
                 self.content = content
-                self.file = type('MockFileReader', (), {'read': lambda: content})()
+                self.file = type('MockFileReader', (), {'read': lambda self: content})()
         
         mock_file = MockFile(b"fake_image_content")
         filename = "test_image.jpg"
