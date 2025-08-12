@@ -168,7 +168,7 @@ export const exerciseAPI = {
     return ExerciseStatsSchema.parse(data);
   },
 
-  // AI conversion with extended timeout (40 seconds)
+  // AI conversion with extended timeout (2 minutes)
   async convertImageToExercise(files: File[]): Promise<AIConversionResponse> {
     if (!files || files.length === 0) {
       throw new APIClientError('No files provided for AI conversion');
@@ -191,7 +191,7 @@ export const exerciseAPI = {
       method: 'POST',
       headers: {}, // Don't set Content-Type for FormData - let browser set it with boundary
       body: formData,
-      timeout: 40000, // 40 seconds for AI processing
+      timeout: 120000, // 120 seconds (2 minutes) for AI processing
     });
 
     return AIConversionResponseSchema.parse(data);

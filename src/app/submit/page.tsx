@@ -16,10 +16,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Upload, RefreshCw, CheckCircle, PenTool } from "lucide-react";
+import { Upload, RefreshCw, CheckCircle, PenTool, AlertCircle } from "lucide-react";
 import { UploadState, FormData } from "@/lib/types";
 import { mockExercises, categories, levels } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
+import { convertImageToExercise, getCategories, APIError } from "@/lib/api-client";
+import type { AIConversionResponse } from "@/lib/api-schemas";
 
 function SubmitPageContent() {
   const searchParams = useSearchParams();
@@ -31,12 +33,17 @@ function SubmitPageContent() {
     ? mockExercises.find((ex) => ex.id === exerciseId)
     : null;
 
-  const [uploadState, setUploadState] = useState<UploadState>({
+  const [uploadState, setUploadState] = useState<UploadState & {
+    processingProgress: number;
+    canCancel: boolean;
+  }>({
     file: null,
     preview: null,
     isProcessing: false,
     convertedText: "",
     error: null,
+    processingProgress: 0,
+    canCancel: false,
   });
 
   const [formData, setFormData] = useState<FormData>({
@@ -49,74 +56,125 @@ function SubmitPageContent() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [abortController, setAbortController] = useState<AbortController | null>(null);
 
   // Handle file upload
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) return;
 
     setUploadState((prev) => ({
       ...prev,
-      file,
-      preview: URL.createObjectURL(file),
+      file: files[0], // Keep first file for preview
+      preview: URL.createObjectURL(files[0]),
       error: null,
+      processingProgress: 0,
+      canCancel: false,
     }));
 
-    // Simulate AI processing
-    simulateAIProcessing(file);
+    // Start AI processing with all files
+    handleAIProcessing(files);
   };
 
-  // Simulate AI text conversion
-  const simulateAIProcessing = async (uploadedFile: File) => {
-    setUploadState((prev) => ({ ...prev, isProcessing: true }));
-
-    // Simulate processing delay
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    console.log("Processing file:", uploadedFile.name); // Use the uploadedFile parameter
-
-    if (isSubmittingSolution) {
-      // When solving an existing exercise, only fill the response
-      const mockSolutionText =
-        "Step 1: Start with the equation x² - 5x + 6 = 0\nStep 2: Factor the quadratic: (x-2)(x-3) = 0\nStep 3: Solve for x: x = 2 or x = 3";
-
-      setUploadState((prev) => ({
+  // Real AI processing with 2-minute timeout
+  const handleAIProcessing = async (uploadedFiles: File[]) => {
+    const controller = new AbortController();
+    setAbortController(controller);
+    
+    setUploadState(prev => ({ 
+      ...prev, 
+      isProcessing: true, 
+      error: null,
+      processingProgress: 0,
+      canCancel: true 
+    }));
+    
+    // Progress simulation for better UX (updates every 1200ms for 2-minute process)
+    const progressInterval = setInterval(() => {
+      setUploadState(prev => ({
+        ...prev,
+        processingProgress: Math.min(prev.processingProgress + 1, 95)
+      }));
+    }, 1200);
+    
+    try {
+      console.log("Processing file with AI:", uploadedFiles[0].name);
+      
+      // Call real AI conversion API with 2-minute timeout
+      const result: AIConversionResponse = await convertImageToExercise(uploadedFiles);
+      
+      clearInterval(progressInterval);
+      setUploadState(prev => ({
         ...prev,
         isProcessing: false,
-        convertedText: mockSolutionText,
+        convertedText: isSubmittingSolution ? result.solution : result.statement,
+        processingProgress: 100,
+        canCancel: false,
+        error: null
       }));
-
-      setFormData((prev) => ({
-        ...prev,
-        response: mockSolutionText,
-      }));
-    } else {
-      // When creating a new exercise, fill all fields with AI mock data
-      const mockExerciseData = {
-        title: "Quadratic Equation Factoring Problem",
-        category: "Algebra",
-        level: "intermediate" as const,
-        statement:
-          "Solve the quadratic equation x² - 7x + 12 = 0 by factoring.\n\nShow all your work and verify your solution by substituting back into the original equation.",
-        response:
-          "Solution:\nStep 1: Factor the quadratic expression\nx² - 7x + 12 = (x - 3)(x - 4)\n\nStep 2: Set each factor equal to zero\nx - 3 = 0  or  x - 4 = 0\n\nStep 3: Solve for x\nx = 3  or  x = 4\n\nVerification:\nFor x = 3: (3)² - 7(3) + 12 = 9 - 21 + 12 = 0 ✓\nFor x = 4: (4)² - 7(4) + 12 = 16 - 28 + 12 = 0 ✓",
-      };
-
-      setUploadState((prev) => ({
+      
+      // Auto-fill form with AI results
+      if (isSubmittingSolution) {
+        // When solving an existing exercise, only fill the response
+        setFormData(prev => ({ 
+          ...prev, 
+          response: result.solution 
+        }));
+      } else {
+        // When creating a new exercise, fill all fields
+        setFormData(prev => ({
+          ...prev,
+          title: result.title,
+          statement: result.statement,
+          category: result.category,
+          response: result.solution // Optional solution from AI
+        }));
+      }
+      
+      console.log(`AI processing completed with confidence: ${result.confidenceScore}`);
+      
+    } catch (error) {
+      clearInterval(progressInterval);
+      
+      let errorMessage = "AI processing failed. Please try again.";
+      
+      if (error instanceof APIError) {
+        if (error.status === 408) {
+          errorMessage = "AI processing timed out. Complex mathematical content can take longer than expected.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      setUploadState(prev => ({
         ...prev,
         isProcessing: false,
-        convertedText: mockExerciseData.statement,
+        error: errorMessage,
+        processingProgress: 0,
+        canCancel: false
       }));
-
-      setFormData((prev) => ({
-        ...prev,
-        title: mockExerciseData.title,
-        category: mockExerciseData.category,
-        level: mockExerciseData.level,
-        statement: mockExerciseData.statement,
-        response: mockExerciseData.response,
-      }));
+      
+      console.error("AI processing error:", error);
+    } finally {
+      setAbortController(null);
     }
+  };
+
+  // Cancel AI processing
+  const cancelAIProcessing = () => {
+    if (abortController) {
+      abortController.abort();
+    }
+    
+    setUploadState(prev => ({
+      ...prev,
+      isProcessing: false,
+      processingProgress: 0,
+      canCancel: false,
+      error: "Processing cancelled by user"
+    }));
+    
+    setAbortController(null);
   };
 
   // Handle drag and drop
@@ -126,15 +184,17 @@ function SubmitPageContent() {
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith("image/")) {
+    const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith("image/"));
+    if (files.length > 0) {
       setUploadState((prev) => ({
         ...prev,
-        file,
-        preview: URL.createObjectURL(file),
+        file: files[0], // Keep first file for preview
+        preview: URL.createObjectURL(files[0]),
         error: null,
+        processingProgress: 0,
+        canCancel: false,
       }));
-      simulateAIProcessing(file);
+      handleAIProcessing(files);
     }
   };
 
@@ -165,6 +225,8 @@ function SubmitPageContent() {
         isProcessing: false,
         convertedText: "",
         error: null,
+        processingProgress: 0,
+        canCancel: false,
       });
     }, 3000);
   };
@@ -228,6 +290,7 @@ function SubmitPageContent() {
                 <input
                   type="file"
                   accept="image/*"
+                  multiple
                   onChange={handleFileUpload}
                   className="hidden"
                   id="file-upload"
@@ -268,13 +331,13 @@ function SubmitPageContent() {
                       </div>
                       <div>
                         <p className="text-lg font-medium text-slate-900">
-                          Drop your image here
+                          Drop your images here
                         </p>
                         <p className="text-slate-500">
-                          or click to browse files
+                          or click to browse files (multiple files supported)
                         </p>
                         <p className="text-xs text-slate-400 mt-2">
-                          Supports JPG, PNG, and other image formats
+                          Supports JPG, PNG, and other image formats • Upload multiple images for long exercises
                         </p>
                       </div>
                     </div>
@@ -282,13 +345,75 @@ function SubmitPageContent() {
                 </label>
               </div>
 
-              {/* Processing Status */}
+              {/* Enhanced Processing Status with Progress */}
               {uploadState.isProcessing && (
-                <div className="flex items-center gap-2 p-3 bg-purple-50 rounded-lg">
-                  <RefreshCw className="h-4 w-4 animate-spin text-purple-600" />
-                  <span className="text-sm text-purple-800">
-                    Converting handwriting to text with AI...
-                  </span>
+                <div className="space-y-3 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                  {/* Progress Bar */}
+                  <div className="w-full bg-purple-100 rounded-full h-2">
+                    <div 
+                      className="bg-purple-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${uploadState.processingProgress}%` }}
+                    />
+                  </div>
+                  
+                  {/* Status Messages */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <RefreshCw className="h-4 w-4 animate-spin text-purple-600" />
+                      <span className="text-sm text-purple-800">
+                        {uploadState.processingProgress < 30 
+                          ? "Analyzing handwriting..." 
+                          : uploadState.processingProgress < 70
+                          ? "Processing mathematical content..."
+                          : "Finalizing transcription..."
+                        }
+                      </span>
+                    </div>
+                    
+                    {/* Cancel Button */}
+                    {uploadState.canCancel && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={cancelAIProcessing}
+                        className="text-purple-600 hover:text-purple-800"
+                      >
+                        Cancel
+                      </Button>
+                    )}
+                  </div>
+                  
+                  {/* Time Indicator */}
+                  <p className="text-xs text-purple-600">
+                                            AI processing can take up to 2 minutes for complex mathematical content
+                  </p>
+                </div>
+              )}
+
+              {/* Enhanced Error Handling */}
+              {uploadState.error && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertCircle className="h-4 w-4 text-red-600" />
+                    <span className="text-sm font-medium text-red-800">Processing Failed</span>
+                  </div>
+                  <p className="text-sm text-red-700">{uploadState.error}</p>
+                  
+                  {uploadState.error.includes('timeout') && (
+                    <div className="mt-3 space-y-2">
+                      <p className="text-xs text-red-600">
+                        The AI processing took longer than expected. This can happen with complex mathematical content.
+                      </p>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => uploadState.file && handleAIProcessing([uploadState.file])}
+                        className="text-red-600 border-red-300 hover:bg-red-50"
+                      >
+                        Try Again
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
 
