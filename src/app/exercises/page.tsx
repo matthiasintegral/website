@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { ExerciseCard } from "@/components/exercise-card";
 import { Badge } from "@/components/ui/badge";
 import { Search, Filter, Grid, List } from "lucide-react";
-import { mockExercises, categories, levels } from "@/lib/mock-data";
-import { FilterOptions } from "@/lib/types";
+import { mockExercises, categories, levels } from "@/data";
+import { FilterOptions } from "@/types";
 import {
   DropdownMenu,
   DropdownMenuContent,
