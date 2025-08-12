@@ -39,3 +39,20 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+#images
+**/images/
+.jpg
+.png
+.jpeg
+
+#virtual env
+**/.venv
+**/venv
+
+#uv lock
+**/*.lock
+
+#pycache
+**/__pycache__/
+**/*.pyc

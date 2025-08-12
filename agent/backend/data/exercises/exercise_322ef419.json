@@ -1,0 +1,12 @@
+{
+  "title": "Test Quadratic Equation (6)",
+  "statement": "Solve the quadratic equation: $x^2 - 5x + 6 = 0$",
+  "solution": "Step 1: Factor the expression\n$x^2 - 5x + 6 = (x - 2)(x - 3)$\n\nStep 2: Set factors equal to zero\n$x - 2 = 0$ or $x - 4 = 0$\n\nStep 3: Solve for x\n$x = 2$ or $x = 3$",
+  "category": "Algebra",
+  "id": "exercise_322ef419",
+  "level": "advanced",
+  "status": "finished",
+  "createdAt": "2025-08-11 08:48:43.219344",
+  "imagePaths": [],
+  "confidenceScore": 1.0
+}
