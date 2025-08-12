@@ -14,7 +14,7 @@ import {
   FileText,
   MessageSquare,
 } from "lucide-react";
-import { mockExercises, mockSolutions } from "@/lib/mock-data";
+import { mockExercises, mockSolutions } from "@/data";
 import { cn } from "@/lib/utils";
 
 interface ExerciseDetailPageProps {

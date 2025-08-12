@@ -28,7 +28,7 @@ export interface UploadState {
   error: string | null;
 }
 
-export interface FormData {
+export interface ExerciseFormData {
   title: string;
   statement: string;
   category: string;
