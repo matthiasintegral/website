@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useEffect, useRef, useState, Suspense, useActionState } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,10 +16,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Upload, RefreshCw, CheckCircle, PenTool } from "lucide-react";
-import { UploadState, FormData } from "@/lib/types";
-import { mockExercises, categories, levels } from "@/lib/mock-data";
+import {
+  Upload,
+  RefreshCw,
+  CheckCircle,
+  PenTool,
+  AlertCircle,
+} from "lucide-react";
+import { UploadState, ExerciseFormData } from "@/types";
+import { mockExercises, levels } from "@/data";
 import { cn } from "@/lib/utils";
+import { MathContent } from "@/components/math-content";
+import { findAllExerciseCategory } from "@/services/exercise";
+import { aiConversionAction, type AIConversionActionState } from "./_actions";
+import type { AIConversionExerciseResponseDTO } from "@/services/exercise/dto";
 
 function SubmitPageContent() {
   const searchParams = useSearchParams();
@@ -31,15 +41,22 @@ function SubmitPageContent() {
     ? mockExercises.find((ex) => ex.id === exerciseId)
     : null;
 
-  const [uploadState, setUploadState] = useState<UploadState>({
+  const [uploadState, setUploadState] = useState<
+    UploadState & {
+      processingProgress: number;
+      canCancel: boolean;
+    }
+  >({
     file: null,
     preview: null,
     isProcessing: false,
     convertedText: "",
     error: null,
+    processingProgress: 0,
+    canCancel: false,
   });
 
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<ExerciseFormData>({
     title: "",
     statement: "",
     category: "",
@@ -49,74 +66,117 @@ function SubmitPageContent() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [categoriesState, setCategoriesState] = useState<string[]>([]);
 
-  // Handle file upload
+  const [aiState, formAction] = useActionState<
+    AIConversionActionState | null,
+    FormData
+  >(aiConversionAction, null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const progressTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    // Load categories from API
+    (async () => {
+      try {
+        const result = await findAllExerciseCategory();
+        setCategoriesState(result);
+      } catch (e) {
+        console.error("Failed to load categories", e);
+        setCategoriesState([]);
+      }
+    })();
+  }, []);
+
+  // Handle file upload -> preview + auto-submit the form to server action
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) return;
 
     setUploadState((prev) => ({
       ...prev,
-      file,
-      preview: URL.createObjectURL(file),
+      file: files[0], // Keep first file for preview
+      preview: URL.createObjectURL(files[0]),
       error: null,
+      processingProgress: 0,
+      canCancel: false,
     }));
 
-    // Simulate AI processing
-    simulateAIProcessing(file);
+    // Start progress simulation and submit to server action
+    setUploadState((prev) => ({ ...prev, isProcessing: true }));
+    if (progressTimerRef.current)
+      window.clearInterval(progressTimerRef.current);
+    progressTimerRef.current = window.setInterval(() => {
+      setUploadState((prev) => ({
+        ...prev,
+        processingProgress: Math.min(prev.processingProgress + 1, 95),
+      }));
+    }, 1200);
+
+    // Append files to the form and submit via server action
+    // Note: The input is inside the form; requestSubmit will serialize it
+    formRef.current?.requestSubmit();
   };
 
-  // Simulate AI text conversion
-  const simulateAIProcessing = async (uploadedFile: File) => {
-    setUploadState((prev) => ({ ...prev, isProcessing: true }));
-
-    // Simulate processing delay
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    console.log("Processing file:", uploadedFile.name); // Use the uploadedFile parameter
-
-    if (isSubmittingSolution) {
-      // When solving an existing exercise, only fill the response
-      const mockSolutionText =
-        "Step 1: Start with the equation x² - 5x + 6 = 0\nStep 2: Factor the quadratic: (x-2)(x-3) = 0\nStep 3: Solve for x: x = 2 or x = 3";
-
-      setUploadState((prev) => ({
-        ...prev,
-        isProcessing: false,
-        convertedText: mockSolutionText,
-      }));
-
-      setFormData((prev) => ({
-        ...prev,
-        response: mockSolutionText,
-      }));
-    } else {
-      // When creating a new exercise, fill all fields with AI mock data
-      const mockExerciseData = {
-        title: "Quadratic Equation Factoring Problem",
-        category: "Algebra",
-        level: "intermediate" as const,
-        statement:
-          "Solve the quadratic equation x² - 7x + 12 = 0 by factoring.\n\nShow all your work and verify your solution by substituting back into the original equation.",
-        response:
-          "Solution:\nStep 1: Factor the quadratic expression\nx² - 7x + 12 = (x - 3)(x - 4)\n\nStep 2: Set each factor equal to zero\nx - 3 = 0  or  x - 4 = 0\n\nStep 3: Solve for x\nx = 3  or  x = 4\n\nVerification:\nFor x = 3: (3)² - 7(3) + 12 = 9 - 21 + 12 = 0 ✓\nFor x = 4: (4)² - 7(4) + 12 = 16 - 28 + 12 = 0 ✓",
-      };
-
-      setUploadState((prev) => ({
-        ...prev,
-        isProcessing: false,
-        convertedText: mockExerciseData.statement,
-      }));
-
-      setFormData((prev) => ({
-        ...prev,
-        title: mockExerciseData.title,
-        category: mockExerciseData.category,
-        level: mockExerciseData.level,
-        statement: mockExerciseData.statement,
-        response: mockExerciseData.response,
-      }));
+  // Handle server action responses
+  useEffect(() => {
+    if (!aiState) return;
+    if (progressTimerRef.current) {
+      window.clearInterval(progressTimerRef.current);
+      progressTimerRef.current = null;
     }
+
+    if (aiState.ok) {
+      const result: AIConversionExerciseResponseDTO = aiState.data;
+      setUploadState((prev) => ({
+        ...prev,
+        isProcessing: false,
+        convertedText: isSubmittingSolution
+          ? result.solution
+          : result.statement,
+        processingProgress: 100,
+        canCancel: false,
+        error: null,
+      }));
+
+      if (isSubmittingSolution) {
+        setFormData((prev) => ({ ...prev, response: result.solution }));
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          title: result.title,
+          statement: result.statement,
+          category: result.category,
+          response: result.solution,
+        }));
+      }
+    } else {
+      const errorMessage =
+        aiState.error || "AI processing failed. Please try again.";
+      setUploadState((prev) => ({
+        ...prev,
+        isProcessing: false,
+        error: errorMessage,
+        processingProgress: 0,
+        canCancel: false,
+      }));
+      console.error("AI processing error:", errorMessage);
+    }
+  }, [aiState, isSubmittingSolution]);
+
+  // Cancel AI processing (local only; server actions cannot be aborted easily)
+  const cancelAIProcessing = () => {
+    if (progressTimerRef.current) {
+      window.clearInterval(progressTimerRef.current);
+      progressTimerRef.current = null;
+    }
+    setUploadState((prev) => ({
+      ...prev,
+      isProcessing: false,
+      processingProgress: 0,
+      canCancel: false,
+      error: "Processing cancelled by user",
+    }));
   };
 
   // Handle drag and drop
@@ -126,15 +186,29 @@ function SubmitPageContent() {
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith("image/")) {
+    const files = Array.from(e.dataTransfer.files).filter((file) =>
+      file.type.startsWith("image/")
+    );
+    if (files.length > 0) {
       setUploadState((prev) => ({
         ...prev,
-        file,
-        preview: URL.createObjectURL(file),
+        file: files[0], // Keep first file for preview
+        preview: URL.createObjectURL(files[0]),
         error: null,
+        processingProgress: 0,
+        canCancel: false,
       }));
-      simulateAIProcessing(file);
+      // start progress simulation and submit to server action
+      setUploadState((prev) => ({ ...prev, isProcessing: true }));
+      if (progressTimerRef.current)
+        window.clearInterval(progressTimerRef.current);
+      progressTimerRef.current = window.setInterval(() => {
+        setUploadState((prev) => ({
+          ...prev,
+          processingProgress: Math.min(prev.processingProgress + 1, 95),
+        }));
+      }, 1200);
+      formRef.current?.requestSubmit();
     }
   };
 
@@ -165,6 +239,8 @@ function SubmitPageContent() {
         isProcessing: false,
         convertedText: "",
         error: null,
+        processingProgress: 0,
+        canCancel: false,
       });
     }, 3000);
   };
@@ -225,13 +301,16 @@ function SubmitPageContent() {
             <CardContent className="space-y-6">
               {/* Upload Area */}
               <div className="space-y-4">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  id="file-upload"
-                />
+                <form ref={formRef} action={formAction} className="hidden">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleFileUpload}
+                    name="files"
+                    id="file-upload"
+                  />
+                </form>
                 <label
                   htmlFor="file-upload"
                   className={cn(
@@ -268,13 +347,14 @@ function SubmitPageContent() {
                       </div>
                       <div>
                         <p className="text-lg font-medium text-slate-900">
-                          Drop your image here
+                          Drop your images here
                         </p>
                         <p className="text-slate-500">
-                          or click to browse files
+                          or click to browse files (multiple files supported)
                         </p>
                         <p className="text-xs text-slate-400 mt-2">
-                          Supports JPG, PNG, and other image formats
+                          Supports JPG, PNG, and other image formats • Upload
+                          multiple images for long exercises
                         </p>
                       </div>
                     </div>
@@ -282,33 +362,90 @@ function SubmitPageContent() {
                 </label>
               </div>
 
-              {/* Processing Status */}
+              {/* Enhanced Processing Status with Progress */}
               {uploadState.isProcessing && (
-                <div className="flex items-center gap-2 p-3 bg-purple-50 rounded-lg">
-                  <RefreshCw className="h-4 w-4 animate-spin text-purple-600" />
-                  <span className="text-sm text-purple-800">
-                    Converting handwriting to text with AI...
-                  </span>
+                <div className="space-y-3 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                  {/* Progress Bar */}
+                  <div className="w-full bg-purple-100 rounded-full h-2">
+                    <div
+                      className="bg-purple-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${uploadState.processingProgress}%` }}
+                    />
+                  </div>
+
+                  {/* Status Messages */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <RefreshCw className="h-4 w-4 animate-spin text-purple-600" />
+                      <span className="text-sm text-purple-800">
+                        {uploadState.processingProgress < 30
+                          ? "Analyzing handwriting..."
+                          : uploadState.processingProgress < 70
+                          ? "Processing mathematical content..."
+                          : "Finalizing transcription..."}
+                      </span>
+                    </div>
+
+                    {/* Cancel Button */}
+                    {uploadState.canCancel && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={cancelAIProcessing}
+                        className="text-purple-600 hover:text-purple-800"
+                      >
+                        Cancel
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Time Indicator */}
+                  <p className="text-xs text-purple-600">
+                    AI processing can take up to 2 minutes for complex
+                    mathematical content
+                  </p>
+                </div>
+              )}
+
+              {/* Enhanced Error Handling */}
+              {uploadState.error && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertCircle className="h-4 w-4 text-red-600" />
+                    <span className="text-sm font-medium text-red-800">
+                      Processing Failed
+                    </span>
+                  </div>
+                  <p className="text-sm text-red-700">{uploadState.error}</p>
+
+                  {uploadState.error.includes("timeout") && (
+                    <div className="mt-3 space-y-2">
+                      <p className="text-xs text-red-600">
+                        The AI processing took longer than expected. This can
+                        happen with complex mathematical content.
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => formRef.current?.requestSubmit()}
+                        className="text-red-600 border-red-300 hover:bg-red-50"
+                      >
+                        Try Again
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
 
               {/* Converted Text Preview */}
               {uploadState.convertedText && (
                 <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-emerald-600" />
                     <span className="text-sm font-medium text-emerald-800">
                       AI Conversion Complete
                     </span>
                   </div>
-                  <p className="text-sm text-emerald-700 whitespace-pre-wrap">
-                    {uploadState.convertedText}
-                  </p>
-                  <p className="text-xs text-emerald-600 mt-2">
-                    {isSubmittingSolution
-                      ? "Text has been copied to the solution field → You can edit it there"
-                      : "All fields have been auto-filled (title, category, level, statement, and optional solution) → You can edit them in the form"}
-                  </p>
                 </div>
               )}
             </CardContent>
@@ -356,7 +493,7 @@ function SubmitPageContent() {
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
                         <SelectContent>
-                          {categories.map((category) => (
+                          {categoriesState.map((category) => (
                             <SelectItem key={category} value={category}>
                               {category}
                             </SelectItem>
@@ -430,6 +567,18 @@ function SubmitPageContent() {
                     required
                     className="min-h-[200px]"
                   />
+                  {/* LaTeX Preview */}
+                  {(isSubmittingSolution ? formData.response : formData.statement) && (
+                    <div className="mt-3 p-3 bg-slate-50 border rounded-lg">
+                      <div className="text-xs font-medium text-slate-600 mb-2">
+                        LaTeX Preview:
+                      </div>
+                      <MathContent 
+                        content={(isSubmittingSolution ? formData.response : formData.statement) || ""}
+                        className="text-sm text-slate-800"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Optional Response for new exercises */}
@@ -456,6 +605,18 @@ function SubmitPageContent() {
                       rows={6}
                       className="min-h-[150px]"
                     />
+                    {/* LaTeX Preview for Optional Response */}
+                    {formData.response && (
+                      <div className="mt-3 p-3 bg-slate-50 border rounded-lg">
+                        <div className="text-xs font-medium text-slate-600 mb-2">
+                          Solution LaTeX Preview:
+                        </div>
+                        <MathContent 
+                          content={formData.response}
+                          className="text-sm text-slate-800"
+                        />
+                      </div>
+                    )}
                     <p className="text-xs text-slate-500">
                       You can provide a solution to your own exercise to help
                       other students learn.
