@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { CalendarDays, User, FileText } from "lucide-react";
 import { Exercise } from "@/types";
 import { cn } from "@/lib/utils";
+import { MathContent } from "@/components/math-content";
 
 interface ExerciseCardProps {
   exercise: Exercise;
@@ -71,9 +72,9 @@ export function ExerciseCard({
 
       <CardContent className="space-y-4">
         {/* Statement Preview */}
-        <p className="text-slate-600 text-sm line-clamp-3 leading-relaxed">
-          {exercise.statement}
-        </p>
+        <div className="text-slate-600 text-sm line-clamp-3 leading-relaxed">
+          <MathContent content={exercise.statement} />
+        </div>
 
         {/* Category and Level */}
         <div className="flex items-center gap-2 flex-wrap">

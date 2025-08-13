@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { mockExercises, mockSolutions } from "@/data";
 import { cn } from "@/lib/utils";
+import { MathContent } from "@/components/math-content";
 
 interface ExerciseDetailPageProps {
   params: Promise<{
@@ -118,9 +119,10 @@ export default async function ExerciseDetailPage({
                   <div>
                     <h3 className="font-semibold mb-2">Problem Statement</h3>
                     <div className="p-4 bg-slate-50 rounded-lg">
-                      <p className="text-slate-800 whitespace-pre-wrap leading-relaxed">
-                        {exercise.statement}
-                      </p>
+                      <MathContent 
+                        content={exercise.statement}
+                        className="text-slate-800 leading-relaxed"
+                      />
                     </div>
                   </div>
 
@@ -225,9 +227,10 @@ export default async function ExerciseDetailPage({
 
                         {/* Solution Content */}
                         <div className="space-y-3">
-                          <div className="text-slate-800 whitespace-pre-wrap leading-relaxed">
-                            {solution.content}
-                          </div>
+                          <MathContent 
+                            content={solution.content}
+                            className="text-slate-800 leading-relaxed"
+                          />
                         </div>
                       </div>
                     ))}

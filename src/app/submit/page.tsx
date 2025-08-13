@@ -26,6 +26,7 @@ import {
 import { UploadState, ExerciseFormData } from "@/types";
 import { mockExercises, levels } from "@/data";
 import { cn } from "@/lib/utils";
+import { MathContent } from "@/components/math-content";
 import { findAllExerciseCategory } from "@/services/exercise";
 import { aiConversionAction, type AIConversionActionState } from "./_actions";
 import type { AIConversionExerciseResponseDTO } from "@/services/exercise/dto";
@@ -439,20 +440,12 @@ function SubmitPageContent() {
               {/* Converted Text Preview */}
               {uploadState.convertedText && (
                 <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-emerald-600" />
                     <span className="text-sm font-medium text-emerald-800">
                       AI Conversion Complete
                     </span>
                   </div>
-                  <p className="text-sm text-emerald-700 whitespace-pre-wrap">
-                    {uploadState.convertedText}
-                  </p>
-                  <p className="text-xs text-emerald-600 mt-2">
-                    {isSubmittingSolution
-                      ? "Text has been copied to the solution field → You can edit it there"
-                      : "All fields have been auto-filled (title, category, level, statement, and optional solution) → You can edit them in the form"}
-                  </p>
                 </div>
               )}
             </CardContent>
@@ -574,6 +567,18 @@ function SubmitPageContent() {
                     required
                     className="min-h-[200px]"
                   />
+                  {/* LaTeX Preview */}
+                  {(isSubmittingSolution ? formData.response : formData.statement) && (
+                    <div className="mt-3 p-3 bg-slate-50 border rounded-lg">
+                      <div className="text-xs font-medium text-slate-600 mb-2">
+                        LaTeX Preview:
+                      </div>
+                      <MathContent 
+                        content={(isSubmittingSolution ? formData.response : formData.statement) || ""}
+                        className="text-sm text-slate-800"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Optional Response for new exercises */}
@@ -600,6 +605,18 @@ function SubmitPageContent() {
                       rows={6}
                       className="min-h-[150px]"
                     />
+                    {/* LaTeX Preview for Optional Response */}
+                    {formData.response && (
+                      <div className="mt-3 p-3 bg-slate-50 border rounded-lg">
+                        <div className="text-xs font-medium text-slate-600 mb-2">
+                          Solution LaTeX Preview:
+                        </div>
+                        <MathContent 
+                          content={formData.response}
+                          className="text-sm text-slate-800"
+                        />
+                      </div>
+                    )}
                     <p className="text-xs text-slate-500">
                       You can provide a solution to your own exercise to help
                       other students learn.
