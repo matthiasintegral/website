@@ -1,6 +1,6 @@
 ---
-description: 
-globs: 
+description: Tailwind CSS v4 styling and design system
+globs:
 alwaysApply: false
 ---
 # Styling System

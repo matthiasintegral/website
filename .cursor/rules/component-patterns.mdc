@@ -1,6 +1,6 @@
 ---
-description: 
-globs: 
+description: shadcn/ui component organization and styling patterns
+globs:
 alwaysApply: false
 ---
 # Component Organization & Patterns

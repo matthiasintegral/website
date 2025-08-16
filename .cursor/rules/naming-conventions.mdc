@@ -1,6 +1,6 @@
 ---
-description: 
-globs: 
+description: File and code naming convention standards
+globs:
 alwaysApply: false
 ---
 # Naming Conventions

@@ -1,0 +1,125 @@
+---
+description: When Why and How to Use MCPs Tools
+globs:
+alwaysApply: false
+---
+
+# MCP Server Usage Guide
+
+## Available MCP Servers
+
+### 1. Context7 - Library Documentation
+**Purpose**: Get up-to-date documentation for any programming library or framework
+**When to use**: Code implementation, API usage, configuration, setup instructions
+
+### 2. LangGraph/LangChain Documentation  
+**Purpose**: Access official LangGraph and LangChain documentation
+**When to use**: AI agent development, graph-based workflows, LangChain integrations
+
+## Context7 Usage Patterns
+
+### Automatic Invocation
+For ANY question involving:
+- Code examples or implementation
+- Library setup or configuration 
+- API documentation or usage
+- Framework-specific patterns
+
+**Examples**:
+```
+"How do I set up authentication with Supabase?"
+"Show me React hook examples"
+"Configure MongoDB connection"
+```
+
+### Direct Library Targeting
+When you know the specific library, use Context7 ID format:
+```
+"Implement file upload with /vercel/next.js"
+"Set up database with /prisma/prisma" 
+"Create components with /facebook/react"
+```
+
+### Available Tools
+- `resolve-library-id`: Find Context7-compatible library ID
+- `get-library-docs`: Fetch documentation with optional topic focus
+
+## LangGraph/LangChain Usage
+
+### Required Workflow
+For ANY LangGraph or LangChain question, ALWAYS:
+
+1. Call `list_doc_sources` to get available documentation
+2. Call `fetch_docs` to read the main llms.txt file
+3. Analyze URLs and match them to the user's question
+4. Call `fetch_docs` on relevant URLs to get specific documentation
+5. Use this information to provide accurate, up-to-date answers
+
+### When to Use
+- Building AI agents or workflows
+- Graph-based processing patterns  
+- LangChain integrations
+- State management in AI applications
+- Multi-step reasoning systems
+
+**Examples**:
+```
+"How do I create a LangGraph workflow?"
+"What are LangChain's memory options?"
+"Build a multi-agent system"
+```
+
+## Best Practices
+
+### Context7
+- Include library versions when relevant
+- Use topic parameter to focus docs: `topic: "authentication"`
+- Reference official examples from retrieved docs
+- Verify current API patterns vs older tutorials
+
+### LangGraph/LangChain  
+- Always fetch latest docs (don't rely on training data)
+- Cross-reference multiple doc sections for complex features
+- Include proper imports and setup in code examples
+- Mention version compatibility when relevant
+
+## Integration Examples
+
+### Full Stack App with Auth
+```
+"Build user authentication with /supabase/supabase and /vercel/next.js"
+```
+
+### AI Agent with Memory
+```
+"Create a LangGraph agent with persistent memory using LangChain"
+→ Triggers LangGraph docs workflow automatically
+```
+
+### API Integration
+```
+"Integrate /stripe/stripe payments in /facebook/react app"
+```
+
+## Error Handling
+
+### Context7 Issues
+- Try `bunx` instead of `npx` for module resolution
+- Use `--experimental-vm-modules` for ESM issues
+- Add `@latest` for version conflicts
+
+### LangGraph/LangChain Issues  
+- Ensure `uvx` is available for mcpdoc
+- Check internet connectivity for doc fetching
+- Verify URLs in llms.txt are accessible
+
+## Rule Activation
+
+This rule is triggered by:
+- Questions about library implementation
+- Requests for code examples or setup
+- API documentation needs
+- LangGraph/LangChain specific queries
+- Configuration or integration questions
+
+The MCP tools will be invoked automatically based on context without requiring explicit tool calls in prompts.

@@ -1,6 +1,6 @@
 ---
-description: 
-globs: 
+description: Next.js App Router project structure guide
+globs:
 alwaysApply: false
 ---
 # Project Structure Guide

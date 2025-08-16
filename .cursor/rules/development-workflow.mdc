@@ -1,6 +1,6 @@
 ---
-description: 
-globs: 
+description: Development scripts and tooling workflow guide
+globs:
 alwaysApply: false
 ---
 # Development Workflow
